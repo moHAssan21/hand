@@ -3,26 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand Gesture Tracker</title>
+    <title>Hand Gesture Recognition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Hand Gesture Tracker</h1>
-        </header>
-        <div class="video-container">
-            <video id="camera" autoplay></video>
-            <div id="overlay">
-                <p id="gesture-result">Loading...</p>
-            </div>
-        </div>
-        <div class="controls">
-            <button id="start-camera">Start Camera</button>
-            <button id="stop-camera" disabled>Stop Camera</button>
-        </div>
-    </div>
+    <header>
+        <h1>Hand Gesture Recognition Tool</h1>
+    </header>
     
+    <main>
+        <section class="camera-section">
+            <video id="camera" autoplay playsinline></video>
+            <div class="controls">
+                <button id="start-camera">Start Camera</button>
+                <button id="stop-camera" disabled>Stop Camera</button>
+            </div>
+        </section>
+        
+        <section id="gesture-result">
+            <h2>Detected Fingers: <span id="finger-count">0</span></h2>
+        </section>
+    </main>
+
+    <footer>
+        <p>Made with ❤️ by YourName</p>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.min.js"></script>
