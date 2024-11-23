@@ -1,22 +1,22 @@
-// متغيرات الكاميرا ومكتبة MediaPipe
+// Initializing variables
 let stream = null;
 let hands = null;
 let cameraInstance = null;
-let camera = document.getElementById('camera');
-let startButton = document.getElementById('start-camera');
-let stopButton = document.getElementById('stop-camera');
-let gestureResult = document.getElementById('gesture-result');
-let overlay = document.getElementById('overlay');
+const camera = document.getElementById('camera');
+const startButton = document.getElementById('start-camera');
+const stopButton = document.getElementById('stop-camera');
+const gestureResult = document.getElementById('gesture-result');
+const overlay = document.getElementById('overlay');
 
-// إعداد الكاميرا
+// Start Camera
 async function startCamera() {
     try {
-        // تأكد من أنه يمكن الوصول إلى الكاميرا
+        // Accessing the camera
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
         camera.srcObject = stream;
         camera.play();
 
-        // تحميل مكتبة MediaPipe بعد التأكد من تحميل الصفحة
+        // Initialize MediaPipe Hands after camera is ready
         if (!hands) {
             hands = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1632/${file}`,
@@ -32,7 +32,7 @@ async function startCamera() {
             hands.onResults(onResults);
         }
 
-        // إعداد الكاميرا
+        // Initialize the camera instance for MediaPipe
         cameraInstance = new Camera(camera, {
             onFrame: async () => {
                 await hands.send({ image: camera });
@@ -51,7 +51,7 @@ async function startCamera() {
     }
 }
 
-// إيقاف الكاميرا
+// Stop Camera
 function stopCamera() {
     if (stream) {
         const tracks = stream.getTracks();
@@ -66,7 +66,7 @@ function stopCamera() {
     overlay.textContent = 'Camera stopped.';
 }
 
-// معالجة نتائج MediaPipe Hands
+// Handle results from MediaPipe Hands
 function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
@@ -78,40 +78,40 @@ function onResults(results) {
     }
 }
 
-// رسم النقاط والخطوط
+// Draw hand landmarks (as lines connecting each point)
 function drawHandLandmarks(landmarks) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = camera.width;
     canvas.height = camera.height;
-    document.body.appendChild(canvas); // إضافة الكانفاس إلى الصفحة بشكل مؤقت (يمكن إخفاءه لاحقاً)
+    document.body.appendChild(canvas); // Temporary addition of canvas for visualization
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // مسح الرسومات السابقة
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawing
     ctx.beginPath();
     for (let i = 0; i < landmarks.length; i++) {
         const x = landmarks[i].x * canvas.width;
         const y = landmarks[i].y * canvas.height;
         ctx.lineWidth = 5;
-        ctx.strokeStyle = '#FF6347'; // لون الخط
+        ctx.strokeStyle = '#FF6347'; // Line color
         ctx.lineTo(x, y);
     }
     ctx.stroke();
 }
 
-// حساب الأصابع المرفوعة
+// Count the number of fingers raised
 function countFingers(landmarks) {
     const fingers = [
-        landmarks[8],  // طرف الإصبع السبابة
-        landmarks[12], // طرف الإصبع الوسطى
-        landmarks[16], // طرف الإصبع البنصر
-        landmarks[20], // طرف الإصبع الخنصر
+        landmarks[8],  // Index Finger Tip
+        landmarks[12], // Middle Finger Tip
+        landmarks[16], // Ring Finger Tip
+        landmarks[20], // Pinky Finger Tip
     ];
 
     const base = [
-        landmarks[6],  // قاعدة الإصبع السبابة
-        landmarks[10], // قاعدة الإصبع الوسطى
-        landmarks[14], // قاعدة الإصبع البنصر
-        landmarks[18], // قاعدة الإصبع الخنصر
+        landmarks[6],  // Index Finger Base
+        landmarks[10], // Middle Finger Base
+        landmarks[14], // Ring Finger Base
+        landmarks[18], // Pinky Finger Base
     ];
 
     let count = 0;
@@ -121,7 +121,7 @@ function countFingers(landmarks) {
         }
     }
 
-    // الإبهام (حالة خاصة)
+    // Thumb (special case)
     if (landmarks[4].x < landmarks[3].x) {
         count++;
     }
@@ -129,8 +129,6 @@ function countFingers(landmarks) {
     return count;
 }
 
-// بدء الكاميرا
+// Event listeners for buttons
 startButton.addEventListener('click', startCamera);
-
-// إيقاف الكاميرا
 stopButton.addEventListener('click', stopCamera);
