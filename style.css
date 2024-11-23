@@ -1,4 +1,3 @@
-/* Reset and global styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,60 +5,81 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Outfit', sans-serif;
     background-color: #f5f5f5;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     height: 100vh;
-    text-align: center;
-}
-
-header {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-/* Camera Section Styles */
-.camera-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
-    width: 640px;
-    height: 360px;
-    background-color: #000;
-    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #camera {
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    object-fit: cover;
 }
 
-.controls button {
-    background-color: #007bff;
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.buttons {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+button {
+    background-color: #4CAF50;
     color: white;
-    border: none;
     padding: 10px 20px;
-    font-size: 16px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    margin: 10px;
     transition: background-color 0.3s ease;
 }
 
-.controls button:hover {
-    background-color: #0056b3;
+button:hover {
+    background-color: #45a049;
 }
 
-/* Gesture Result Section */
 #gesture-result {
-    font-size: 1.5rem;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: white;
     font-weight: bold;
 }
 
-/* Footer */
-footer {
-    margin-top: 20px;
-    font-size: 1rem;
-    color: #777;
+@media (max-width: 768px) {
+    .buttons {
+        flex-direction: column;
+        position: fixed;
+        top: 10px;
+    }
+
+    #camera {
+        height: 100vh;
+        width: 100%;
+    }
 }
