@@ -1,15 +1,28 @@
 const camera = document.getElementById('camera');
 const startButton = document.getElementById('start-camera');
 const stopButton = document.getElementById('stop-camera');
-const gestureResult = document.getElementById('gesture-result');
+const fingerCountElement = document.getElementById('finger-count');
 let stream = null;
 let hands = null;
 let cameraInstance = null;
 
-// Start the camera and MediaPipe Hands
+// Check if getUserMedia is supported
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Your browser does not support camera access. Please use a modern browser.');
+}
+
 startButton.addEventListener('click', async () => {
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        // Request camera access with supported settings
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { exact: 'user' }, // Use front camera explicitly
+                width: { ideal: 640 },
+                height: { ideal: 360 }
+            }
+        });
+
+        // Display the video stream on the camera element
         camera.srcObject = stream;
 
         // Initialize MediaPipe Hands
@@ -26,7 +39,7 @@ startButton.addEventListener('click', async () => {
 
         hands.onResults(onResults);
 
-        // Initialize Camera Utils
+        // Initialize Camera Utils for frame processing
         cameraInstance = new Camera(camera, {
             onFrame: async () => {
                 await hands.send({ image: camera });
@@ -36,15 +49,15 @@ startButton.addEventListener('click', async () => {
         });
 
         cameraInstance.start();
-
         startButton.disabled = true;
         stopButton.disabled = false;
     } catch (error) {
-        alert('Unable to access camera: ' + error.message);
+        console.error('Error accessing camera:', error.message);
+        alert('Failed to access camera: ' + error.message);
     }
 });
 
-// Stop the camera and MediaPipe Hands
+// Stop the camera and processing
 stopButton.addEventListener('click', () => {
     if (stream) {
         const tracks = stream.getTracks();
@@ -58,20 +71,18 @@ stopButton.addEventListener('click', () => {
     stopButton.disabled = true;
 });
 
-// Handle results from MediaPipe Hands
+// Handle the hand gesture results
 function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
-
-        // Calculate the number of fingers raised
         const fingers = countFingers(landmarks);
-        gestureResult.textContent = `Fingers: ${fingers}`;
+        fingerCountElement.textContent = fingers;
     } else {
-        gestureResult.textContent = 'No hand detected';
+        fingerCountElement.textContent = 'No hand detected';
     }
 }
 
-// Helper function to count fingers raised
+// Count raised fingers based on landmarks
 function countFingers(landmarks) {
     const fingers = [
         landmarks[8],  // Index Finger Tip
@@ -94,7 +105,7 @@ function countFingers(landmarks) {
         }
     }
 
-    // Thumb (Special Case)
+    // Special case for thumb
     if (landmarks[4].x < landmarks[3].x) {
         count++;
     }
