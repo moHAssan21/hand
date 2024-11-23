@@ -1,31 +1,20 @@
 const camera = document.getElementById('camera');
 const startButton = document.getElementById('start-camera');
 const stopButton = document.getElementById('stop-camera');
-const fingerCountElement = document.getElementById('finger-count');
+const gestureResult = document.getElementById('gesture-result');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 let stream = null;
 let hands = null;
 let cameraInstance = null;
 
-// Check if getUserMedia is supported
-if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    alert('Your browser does not support camera access. Please use a modern browser.');
-}
-
-startButton.addEventListener('click', async () => {
+// إعدادات الكاميرا
+async function startCamera() {
     try {
-        // Request camera access with supported settings
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: { exact: 'user' }, // Use front camera explicitly
-                width: { ideal: 640 },
-                height: { ideal: 360 }
-            }
-        });
-
-        // Display the video stream on the camera element
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
         camera.srcObject = stream;
+        camera.play();
 
-        // Initialize MediaPipe Hands
         hands = new Hands({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
         });
@@ -39,26 +28,25 @@ startButton.addEventListener('click', async () => {
 
         hands.onResults(onResults);
 
-        // Initialize Camera Utils for frame processing
         cameraInstance = new Camera(camera, {
             onFrame: async () => {
                 await hands.send({ image: camera });
             },
-            width: 640,
-            height: 360,
+            width: window.innerWidth,
+            height: window.innerHeight,
         });
 
         cameraInstance.start();
+
         startButton.disabled = true;
         stopButton.disabled = false;
     } catch (error) {
-        console.error('Error accessing camera:', error.message);
-        alert('Failed to access camera: ' + error.message);
+        alert('Unable to access camera: ' + error.message);
     }
-});
+}
 
-// Stop the camera and processing
-stopButton.addEventListener('click', () => {
+// إيقاف الكاميرا
+function stopCamera() {
     if (stream) {
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
@@ -69,33 +57,48 @@ stopButton.addEventListener('click', () => {
     }
     startButton.disabled = false;
     stopButton.disabled = true;
-});
+}
 
-// Handle the hand gesture results
+// تتبع الأصابع
 function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
+        drawHandLandmarks(landmarks);
         const fingers = countFingers(landmarks);
-        fingerCountElement.textContent = fingers;
+        gestureResult.textContent = `Fingers: ${fingers}`;
     } else {
-        fingerCountElement.textContent = 'No hand detected';
+        gestureResult.textContent = 'No hand detected';
     }
 }
 
-// Count raised fingers based on landmarks
+// رسم الأصابع والخطوط
+function drawHandLandmarks(landmarks) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // مسح الرسومات السابقة
+    ctx.beginPath();
+    for (let i = 0; i < landmarks.length; i++) {
+        const x = landmarks[i].x * canvas.width;
+        const y = landmarks[i].y * canvas.height;
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#FF6347'; // لون الخط
+        ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+}
+
+// حساب الأصابع المرفوعة
 function countFingers(landmarks) {
     const fingers = [
-        landmarks[8],  // Index Finger Tip
-        landmarks[12], // Middle Finger Tip
-        landmarks[16], // Ring Finger Tip
-        landmarks[20], // Pinky Finger Tip
+        landmarks[8],  // طرف الإصبع السبابة
+        landmarks[12], // طرف الإصبع الوسطى
+        landmarks[16], // طرف الإصبع البنصر
+        landmarks[20], // طرف الإصبع الخنصر
     ];
 
     const base = [
-        landmarks[6],  // Index Finger Base
-        landmarks[10], // Middle Finger Base
-        landmarks[14], // Ring Finger Base
-        landmarks[18], // Pinky Finger Base
+        landmarks[6],  // قاعدة الإصبع السبابة
+        landmarks[10], // قاعدة الإصبع الوسطى
+        landmarks[14], // قاعدة الإصبع البنصر
+        landmarks[18], // قاعدة الإصبع الخنصر
     ];
 
     let count = 0;
@@ -105,10 +108,16 @@ function countFingers(landmarks) {
         }
     }
 
-    // Special case for thumb
+    // الإبهام (حالة خاصة)
     if (landmarks[4].x < landmarks[3].x) {
         count++;
     }
 
     return count;
 }
+
+// بدء الكاميرا
+startButton.addEventListener('click', startCamera);
+
+// إيقاف الكاميرا
+stopButton.addEventListener('click', stopCamera);
