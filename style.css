@@ -1,13 +1,7 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298); /* خلفية متدرجة */
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: white;
     display: flex;
     justify-content: center;
@@ -19,7 +13,7 @@ body {
 .container {
     text-align: center;
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px); /* تأثير الضبابية الخلفية */
+    backdrop-filter: blur(10px);
     padding: 20px;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -28,9 +22,6 @@ body {
 header h1 {
     margin-bottom: 20px;
     font-size: 2rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
 }
 
 .video-container {
@@ -88,25 +79,4 @@ button:disabled {
 
 button:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.4);
-}
-
-#gesture-result {
-    margin-top: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-}
-
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-
-    header h1 {
-        font-size: 1.5rem;
-    }
-
-    .video-container {
-        height: 200px;
-    }
 }
