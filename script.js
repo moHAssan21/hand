@@ -2,7 +2,8 @@ const camera = document.getElementById('camera');
 const startButton = document.getElementById('start-camera');
 const stopButton = document.getElementById('stop-camera');
 const gestureResult = document.getElementById('gesture-result');
-const canvas = document.getElementById('canvas');
+const overlay = document.getElementById('overlay');
+const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 let stream = null;
 let hands = null;
@@ -40,6 +41,7 @@ async function startCamera() {
 
         startButton.disabled = true;
         stopButton.disabled = false;
+        overlay.textContent = 'Tracking Hand Gestures...';
     } catch (error) {
         alert('Unable to access camera: ' + error.message);
     }
@@ -57,6 +59,7 @@ function stopCamera() {
     }
     startButton.disabled = false;
     stopButton.disabled = true;
+    overlay.textContent = 'Camera stopped.';
 }
 
 // تتبع الأصابع
