@@ -1,34 +1,37 @@
-const camera = document.getElementById('camera');
-const startButton = document.getElementById('start-camera');
-const stopButton = document.getElementById('stop-camera');
-const gestureResult = document.getElementById('gesture-result');
-const overlay = document.getElementById('overlay');
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
 let stream = null;
 let hands = null;
 let cameraInstance = null;
+let camera = document.getElementById('camera');
+let startButton = document.getElementById('start-camera');
+let stopButton = document.getElementById('stop-camera');
+let gestureResult = document.getElementById('gesture-result');
+let overlay = document.getElementById('overlay');
 
-// إعدادات الكاميرا
+// إعداد الكاميرا
 async function startCamera() {
     try {
+        // تأكد من أنه يمكن الوصول إلى الكاميرا
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
         camera.srcObject = stream;
         camera.play();
 
-        hands = new Hands({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-        });
+        // تأكد من تحميل الكائن hands بعد تحميل المكتبة
+        if (!hands) {
+            hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1632/${file}`,
+            });
 
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.8,
-            minTrackingConfidence: 0.8,
-        });
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.8,
+                minTrackingConfidence: 0.8,
+            });
 
-        hands.onResults(onResults);
+            hands.onResults(onResults);
+        }
 
+        // إعداد الكاميرا
         cameraInstance = new Camera(camera, {
             onFrame: async () => {
                 await hands.send({ image: camera });
@@ -76,6 +79,13 @@ function onResults(results) {
 
 // رسم الأصابع والخطوط
 function drawHandLandmarks(landmarks) {
+    // رسم النقاط والأصابع على الفيديو
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = camera.width;
+    canvas.height = camera.height;
+    document.body.appendChild(canvas); // إضافة الكانفاس إلى الصفحة بشكل مؤقت (يمكن إخفاءه لاحقاً)
+
     ctx.clearRect(0, 0, canvas.width, canvas.height); // مسح الرسومات السابقة
     ctx.beginPath();
     for (let i = 0; i < landmarks.length; i++) {
