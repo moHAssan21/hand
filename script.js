@@ -1,3 +1,4 @@
+// متغيرات الكاميرا ومكتبة MediaPipe
 let stream = null;
 let hands = null;
 let cameraInstance = null;
@@ -15,7 +16,7 @@ async function startCamera() {
         camera.srcObject = stream;
         camera.play();
 
-        // تأكد من تحميل الكائن hands بعد تحميل المكتبة
+        // تحميل مكتبة MediaPipe بعد التأكد من تحميل الصفحة
         if (!hands) {
             hands = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1632/${file}`,
@@ -65,7 +66,7 @@ function stopCamera() {
     overlay.textContent = 'Camera stopped.';
 }
 
-// تتبع الأصابع
+// معالجة نتائج MediaPipe Hands
 function onResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0];
@@ -77,9 +78,8 @@ function onResults(results) {
     }
 }
 
-// رسم الأصابع والخطوط
+// رسم النقاط والخطوط
 function drawHandLandmarks(landmarks) {
-    // رسم النقاط والأصابع على الفيديو
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = camera.width;
